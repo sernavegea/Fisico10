@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0d1117">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>MiReto · Plataforma de entrenamiento</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0d1117;--s1:#151b23;--s2:#1c242e;--s3:#253040;--line:#2a3441;
+  --tx:#e6ebf1;--mut:#8a96a6;--dim:#5d6878;
+  --acc:#ff6a2b;--acc2:#ff8d55;--ok:#3ccf8e;--warn:#f5b83d;--bad:#ff5d5d;--info:#4ea8ff;
+  --r:14px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--tx);font-family:Barlow,system-ui,sans-serif;font-size:16px;line-height:1.4}
+body{min-height:100vh}
+h1,h2,h3,.cond{font-family:"Barlow Condensed",Barlow,sans-serif;font-weight:700;letter-spacing:.01em;margin:0;line-height:1.1}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+a{color:var(--acc)}
+input,textarea,select{font:inherit;color:var(--tx);background:var(--s2);border:1px solid var(--line);border-radius:10px;padding:11px 12px;width:100%;outline:none}
+input:focus,textarea:focus,select:focus{border-color:var(--acc)}
+textarea{resize:vertical;min-height:80px}
+select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--mut) 50%),linear-gradient(135deg,var(--mut) 50%,transparent 50%);background-position:calc(100% - 16px) 50%,calc(100% - 11px) 50%;background-size:5px 5px;background-repeat:no-repeat;padding-right:30px}
+label{display:block;font-size:.78rem;font-weight:600;color:var(--mut);margin:14px 0 6px;text-transform:uppercase;letter-spacing:.06em}
+svg.i{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+
+/* layout */
+.shell{max-width:820px;margin:0 auto;padding:0 16px calc(90px + env(safe-area-inset-bottom))}
+.topbar{position:sticky;top:0;z-index:15;background:rgba(13,17,23,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);padding:calc(10px + env(safe-area-inset-top)) 0 10px}
+.topbar .in{max-width:820px;margin:0 auto;padding:0 16px;display:flex;align-items:center;gap:12px}
+.brand{font-family:"Barlow Condensed";font-weight:700;font-size:1.45rem;letter-spacing:.02em}
+.brand b{color:var(--acc)}
+.role{font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:6px;background:var(--s2);color:var(--mut)}
+.role.t{background:rgba(255,106,43,.14);color:var(--acc)}
+.sp{flex:1}
+.who{display:flex;align-items:center;gap:8px;font-weight:600;font-size:.9rem;color:var(--mut)}
+.avatar{width:34px;height:34px;border-radius:10px;background:var(--s3);display:grid;place-items:center;font-weight:700;font-family:"Barlow Condensed";font-size:1rem;color:var(--tx);flex:none}
+.avatar.lg{width:56px;height:56px;border-radius:14px;font-size:1.5rem}
+.demo{background:rgba(78,168,255,.1);color:var(--info);font-size:.82rem;padding:8px 12px;border-radius:10px;margin-top:14px;display:flex;gap:8px;align-items:center}
+
+.ph{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin:22px 0 14px}
+.ph h1{font-size:1.9rem}
+.ph .sub{color:var(--mut);font-size:.92rem;margin-top:4px}
+.back{display:inline-flex;align-items:center;gap:4px;color:var(--mut);font-weight:600;font-size:.9rem;margin-top:16px}
+
+.card{background:var(--s1);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:12px}
+.card h3{font-size:1.15rem;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:12px}
+.kpi{background:var(--s1);border:1px solid var(--line);border-radius:var(--r);padding:14px}
+.kpi .v{font-family:"Barlow Condensed";font-size:2rem;font-weight:700;line-height:1}
+.kpi .l{color:var(--mut);font-size:.8rem;font-weight:600;margin-top:4px}
+.kpi .v small{font-size:1rem;color:var(--mut)}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 16px;border-radius:10px;font-weight:700;background:var(--s3);min-height:44px;white-space:nowrap}
+.btn.pri{background:var(--acc);color:#fff}
+.btn.ghost{background:transparent;border:1px solid var(--line)}
+.btn.danger{background:rgba(255,93,93,.12);color:var(--bad)}
+.btn.sm{min-height:34px;padding:6px 11px;font-size:.88rem;border-radius:8px}
+.btn.full{width:100%}
+.btn:disabled{opacity:.5}
+.btn:active{transform:scale(.98)}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+
+.list{display:flex;flex-direction:column}
+.row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);width:100%;text-align:left}
+.row:last-child{border-bottom:0}
+button.row:hover{background:rgba(255,255,255,.02)}
+.row .m{flex:1;min-width:0}
+.row .m b{display:block;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .m small{color:var(--mut);font-size:.85rem}
+.date{width:46px;text-align:center;flex:none;background:var(--s2);border-radius:10px;padding:5px 0}
+.date b{display:block;font-family:"Barlow Condensed";font-size:1.35rem;line-height:1}
+.date small{font-size:.66rem;text-transform:uppercase;color:var(--mut);font-weight:700;letter-spacing:.05em}
+.date.today{background:var(--acc);color:#fff}.date.today small{color:#ffe1d3}
+
+.tag{display:inline-flex;align-items:center;gap:4px;font-size:.72rem;font-weight:700;padding:3px 8px;border-radius:6px;background:var(--s2);color:var(--mut);text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
+.tag.ok{background:rgba(60,207,142,.12);color:var(--ok)}
+.tag.warn{background:rgba(245,184,61,.12);color:var(--warn)}
+.tag.bad{background:rgba(255,93,93,.12);color:var(--bad)}
+.tag.acc{background:rgba(255,106,43,.12);color:var(--acc)}
+.tag.info{background:rgba(78,168,255,.12);color:var(--info)}
+
+.seg{display:flex;background:var(--s1);border:1px solid var(--line);border-radius:10px;padding:3px;gap:3px;margin-bottom:12px}
+.seg button{flex:1;padding:8px;border-radius:8px;font-weight:700;color:var(--mut);font-size:.92rem}
+.seg button.on{background:var(--s3);color:var(--tx)}
+
+.bar{height:8px;border-radius:99px;background:var(--s3);overflow:hidden}
+.bar>i{display:block;height:100%;background:var(--acc);border-radius:99px}
+.bar.ok>i{background:var(--ok)}
+
+.ex{display:grid;grid-template-columns:28px 1fr auto;gap:10px;padding:12px 0;border-bottom:1px solid var(--line);align-items:start}
+.ex:last-child{border:0}
+.ex .n{width:28px;height:28px;border-radius:8px;background:var(--s3);display:grid;place-items:center;font-weight:700;font-size:.85rem}
+.ex .p{font-family:"Barlow Condensed";font-size:1.2rem;font-weight:700;color:var(--acc);text-align:right;white-space:nowrap}
+.ex small{color:var(--mut);display:block}
+
+.scale{display:flex;gap:4px}
+.scale button{flex:1;padding:9px 0;border-radius:8px;background:var(--s2);border:1px solid var(--line);font-weight:700;font-size:.95rem}
+.scale button.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.scale-l{display:flex;justify-content:space-between;font-size:.72rem;color:var(--dim);margin-top:4px}
+
+.inrow{display:flex;align-items:center;gap:8px}
+.inrow input{flex:1}
+.unit{color:var(--mut);font-weight:600;min-width:34px}
+.check{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;background:var(--s2);border:1px solid var(--line);font-weight:600;width:100%}
+.check.on{border-color:var(--ok);color:var(--ok);background:rgba(60,207,142,.08)}
+.check .bx{width:20px;height:20px;border-radius:6px;border:2px solid currentColor;display:grid;place-items:center}
+
+.note{border-left:3px solid var(--info);background:var(--s2);border-radius:10px;padding:10px 12px;font-size:.93rem}
+.note.acc{border-color:var(--acc)}
+.note.bad{border-color:var(--bad)}
+.note b{display:block;font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);margin-bottom:3px}
+
+.pills{display:flex;gap:6px;flex-wrap:wrap}
+.pills button{padding:7px 12px;border-radius:99px;background:var(--s2);border:1px solid var(--line);font-weight:600;font-size:.88rem}
+.pills button.on{border-color:var(--acc);color:var(--acc);background:rgba(255,106,43,.1)}
+
+.empty{text-align:center;color:var(--mut);padding:26px 10px;font-size:.95rem}
+.mut{color:var(--mut)}.sm{font-size:.86rem}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.hero{background:linear-gradient(135deg,#1e2733,#151b23);border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:12px;position:relative;overflow:hidden}
+.hero:before{content:"";position:absolute;right:-30px;top:-30px;width:140px;height:140px;border-radius:50%;background:radial-gradient(circle,rgba(255,106,43,.25),transparent 70%)}
+.hero .k{font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--acc)}
+.hero h2{font-size:1.7rem;margin:6px 0 4px}
+
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;background:rgba(13,17,23,.96);backdrop-filter:blur(10px);border-top:1px solid var(--line);padding:6px 8px calc(6px + env(safe-area-inset-bottom))}
+nav.tabs .in{max-width:820px;margin:0 auto;display:flex}
+nav.tabs button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;font-size:.72rem;font-weight:700;color:var(--dim);border-radius:10px}
+nav.tabs button.on{color:var(--acc)}
+
+.ovl{position:fixed;inset:0;z-index:50;background:rgba(5,8,12,.7);display:flex;align-items:flex-end;justify-content:center;animation:f .15s}
+.sheet{background:var(--bg);border:1px solid var(--line);width:100%;max-width:620px;max-height:92vh;overflow:auto;border-radius:20px 20px 0 0;padding:20px 18px calc(22px + env(safe-area-inset-bottom));animation:u .2s}
+@media(min-width:700px){.ovl{align-items:center}.sheet{border-radius:20px}}
+.sheet h2{font-size:1.5rem;margin-bottom:4px}
+@keyframes u{from{transform:translateY(30px);opacity:0}}@keyframes f{from{opacity:0}}
+.toast{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--tx);color:var(--bg);font-weight:700;padding:11px 16px;border-radius:10px;z-index:99;animation:u .2s;max-width:90vw;text-align:center}
+
+.login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+.login .box{width:100%;max-width:380px}
+.login .brand{font-size:2.6rem}
+.chart{width:100%;height:auto;display:block}
+.exrow{background:var(--s2);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px}
+.exrow .g{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.exrow input,.exrow select{padding:9px 10px;font-size:.93rem;background:var(--s1)}
+.exrow label{margin:8px 0 4px;font-size:.68rem}
+.athl-check{display:flex;align-items:center;gap:10px;padding:10px;border-radius:10px;background:var(--s2);margin-bottom:6px;width:100%;text-align:left;border:1px solid var(--line)}
+.athl-check.on{border-color:var(--acc)}
+.athl-check .bx{width:20px;height:20px;border-radius:6px;border:2px solid var(--dim);display:grid;place-items:center;flex:none}
+.athl-check.on .bx{background:var(--acc);border-color:var(--acc);color:#fff}
+table{width:100%;border-collapse:collapse;font-size:.92rem}
+th{text-align:left;color:var(--mut);font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;font-weight:700;padding:6px 4px;border-bottom:1px solid var(--line)}
+td{padding:10px 4px;border-bottom:1px solid var(--line)}
+tr:last-child td{border:0}
+.loading{display:grid;place-items:center;min-height:60vh;color:var(--mut)}
+.err{color:var(--bad);font-size:.9rem;margin-top:10px;min-height:1.2em}
+</style>
+</head>
+<body>
+<div id="app"><div class="loading">Cargando…</div></div>
+<script>
+/* =====================================================================
+   CONFIGURACIÓN
+   - Sin config de Firebase la app arranca en MODO DEMO (datos locales).
+   - Para usarla de verdad, pega aquí la config de tu proyecto Firebase
+     (Authentication: Email/Password activado + Firestore) y sube las reglas.
+   ===================================================================== */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyAdZ9FQfB2ot-2xb8-Y1ssrZRmcaLClFgc",
+  authDomain: "studio-9284796658-99019.firebaseapp.com",
+  projectId: "studio-9284796658-99019",
+  storageBucket: "studio-9284796658-99019.firebasestorage.app",
+  messagingSenderId: "547226582124",
+  appId: "1:547226582124:web:e13d567ed7279797c26c49"
+};
+/* const FIREBASE_CONFIG = {
+  apiKey: "...", authDomain: "...", projectId: "...", appId: "..."
+}; */
+const PERMITIR_REGISTRO_ENTRENADOR = true; // ponlo en false cuando hayas creado tu cuenta
+const DOMINIO_USUARIOS = 'atletas.mireto.app'; // email interno: usuario@dominio (no hace falta que exista)
+const PREFIJO = 'mireto_'; // prefijo de colecciones para convivir con otras apps en el mismo proyecto Firebase
+const C = n => PREFIJO + n;
+
+/* ============================ utilidades ============================ */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+const isoD=d=>{const z=new Date(d);z.setMinutes(z.getMinutes()-z.getTimezoneOffset());return z.toISOString().slice(0,10)};
+const HOY=()=>isoD(new Date());
+const addDays=(iso,n)=>{const d=new Date(iso+'T12:00:00');d.setDate(d.getDate()+n);return isoD(d)};
+const fD=(iso,o={day:'numeric',month:'short'})=>new Date(iso+'T12:00:00').toLocaleDateString('es-ES',o);
+const dow=iso=>new Date(iso+'T12:00:00').toLocaleDateString('es-ES',{weekday:'short'}).replace('.','');
+const lunes=iso=>{const d=new Date(iso+'T12:00:00');d.setDate(d.getDate()-((d.getDay()+6)%7));return isoD(d)};
+const ini=n=>String(n||'?').split(' ').filter(Boolean).slice(0,2).map(x=>x[0]).join('').toUpperCase();
+const norm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
+const num=v=>{const n=parseFloat(String(v??'').replace(',','.'));return isNaN(n)?null:n};
+const avg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:null;
+const r1=n=>Math.round(n*10)/10;
+function toast(t){const d=document.createElement('div');d.className='toast';d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),2400)}
+const IC={
+ home:'<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/>',
+ cal:'<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/>',
+ chart:'<path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/>',
+ flag:'<path d="M4 21V4h12l-2 4 2 4H4"/>',
+ user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/>',
+ users:'<circle cx="9" cy="8" r="3.5"/><path d="M2 20c.7-3.5 3.3-5 7-5s6.3 1.5 7 5"/><path d="M16 4.5a3.5 3.5 0 010 7M18 15c2 .6 3.4 2.2 4 5"/>',
+ plus:'<path d="M12 5v14M5 12h14"/>',
+ left:'<path d="M15 18l-6-6 6-6"/>',
+ right:'<path d="M9 6l6 6-6 6"/>',
+ check:'<path d="M5 12l5 5 9-10"/>',
+ out:'<path d="M15 4h4v16h-4M10 17l5-5-5-5M15 12H3"/>',
+ alert:'<path d="M12 3l10 18H2L12 3z"/><path d="M12 10v4M12 17.5v.5"/>',
+ msg:'<path d="M4 4h16v12H8l-4 4z"/>',
+ copy:'<rect x="8" y="8" width="13" height="13" rx="2"/><path d="M4 16V4h12"/>',
+ trash:'<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>',
+ edit:'<path d="M4 20h4L19 9l-4-4L4 16z"/>',
+ dumb:'<path d="M6 7v10M18 7v10M3 9v6M21 9v6M6 12h12"/>'
+};
+const ic=(n,s=20)=>`<svg class="i" viewBox="0 0 24 24" style="width:${s}px;height:${s}px">${IC[n]||''}</svg>`;
+
+const TIPOS=['Fuerza','Resistencia','Velocidad','Técnica','Movilidad','Test','Mixto'];
+const UNIDADES=[['reps','Repeticiones'],['s','Segundos'],['kg','Kilos'],['cm','Centímetros'],['m','Metros'],['-','Solo marcar hecho']];
+const RPE_TXT=['','Muy fácil','','Fácil','','Moderado','','Duro','','Muy duro','Máximo'];
+
+/* ============================ BACKEND: DEMO (local) ============================ */
+class LocalDB{
+  constructor(){this.k='mireto_pro_demo_v1';this.sk='mireto_pro_demo_ses';this.mem={};this.d=this._r(this.k)||this.seed();this._w()}
+  _r(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return this.mem[k]?JSON.parse(this.mem[k]):null}}
+  _s(k,v){const s=JSON.stringify(v);try{localStorage.setItem(k,s)}catch(e){this.mem[k]=s}}
+  _w(){this._s(this.k,this.d)}
+  get demo(){return true}
+  async init(){}
+  async session(){const id=this._r(this.sk);const u=id&&this.d.users.find(x=>x.id===id);return u?this._pub(u):null}
+  _pub(u){const{pass,...r}=u;return r}
+  async login(us,p){const u=this.d.users.find(x=>x.usuario===norm(us)&&x.pass===p);if(!u)throw new Error('Usuario o contraseña incorrectos');this._s(this.sk,u.id);return this._pub(u)}
+  async logout(){this._s(this.sk,null)}
+  async registerTrainer(nombre,usuario,pass){usuario=norm(usuario);if(this.d.users.some(u=>u.usuario===usuario))throw new Error('Ese usuario ya existe');const u={id:uid(),rol:'entrenador',nombre,usuario,pass,creado:Date.now()};this.d.users.push(u);this._w();this._s(this.sk,u.id);return this._pub(u)}
+  async crearAtleta(me,a){const usuario=norm(a.usuario);if(this.d.users.some(u=>u.usuario===usuario))throw new Error('Ese usuario ya existe');const u={id:uid(),rol:'atleta',entrenadorId:me.id,activo:true,creado:Date.now(),...a,usuario};this.d.users.push(u);this._w();return this._pub(u)}
+  async updateUser(id,data){Object.assign(this.d.users.find(u=>u.id===id),data);this._w()}
+  async cambiarPass(me,p){this.d.users.find(u=>u.id===me.id).pass=p;this._w()}
+  async loadAll(me){const D=this.d,c=x=>JSON.parse(JSON.stringify(x));
+    if(me.rol==='entrenador')return c({atletas:D.users.filter(u=>u.entrenadorId===me.id).map(u=>this._pub(u)),entrenos:D.entrenos.filter(x=>x.entrenadorId===me.id),resultados:D.resultados.filter(x=>x.entrenadorId===me.id),retos:D.retos.filter(x=>x.entrenadorId===me.id),intentos:D.intentos.filter(x=>x.entrenadorId===me.id)});
+    const t=D.users.find(u=>u.id===me.entrenadorId);
+    return c({entrenador:t?{id:t.id,nombre:t.nombre}:null,entrenos:D.entrenos.filter(x=>(x.asignados||[]).includes(me.id)),resultados:D.resultados.filter(x=>x.atletaId===me.id),retos:D.retos.filter(x=>(x.asignados||[]).includes(me.id)),intentos:D.intentos.filter(x=>x.atletaId===me.id)})}
+  async put(col,o){o=JSON.parse(JSON.stringify(o));if(!o.id)o.id=uid();const a=this.d[col];const i=a.findIndex(x=>x.id===o.id);if(i>=0)a[i]=o;else a.push(o);this._w();return o.id}
+  async del(col,id){this.d[col]=this.d[col].filter(x=>x.id!==id);this._w()}
+  reset(){localStorage.removeItem(this.k);localStorage.removeItem(this.sk)}
+  seed(){
+    let s=7;const rnd=()=>{s=(s*9301+49297)%233280;return s/233280};
+    const T={id:'t1',rol:'entrenador',nombre:'Entrenador Demo',usuario:'entrenador',pass:'demo123',creado:Date.now()};
+    const A=[['Lucas Martínez','lucas',1.0],['Marta López','marta',1.1],['Hugo Sánchez','hugo',.9],['Carla Ruiz','carla',1.05]].map(([n,u,f],i)=>({id:'a'+(i+1),rol:'atleta',entrenadorId:'t1',nombre:n,usuario:u,pass:'demo123',activo:true,nacimiento:'2014-0'+(i+2)+'-1'+i,notas:i===2?'Molestias de crecimiento en rodilla (Osgood). Evitar saltos repetidos.':'',creado:Date.now(),f}));
+    const all=A.map(a=>a.id);const h=HOY();
+    const TEST={tipo:'Test',titulo:'Test de condición física',dur:45,notas:'Calentamiento 10 min: movilidad articular, carrera suave y 2 progresiones. Cada prueba 2 intentos, apunta el mejor.',ej:[
+      {n:'Flexiones en 30 s',pres:'1 intento',u:'reps',mejor:'mas',notas:'Pecho al puño, cuerpo recto'},
+      {n:'Salto horizontal',pres:'2 intentos',u:'cm',mejor:'mas',notas:'Pies juntos, mide al talón'},
+      {n:'Plancha frontal',pres:'1 intento máx.',u:'s',mejor:'mas',notas:'Para cuando cae la cadera'},
+      {n:'Sprint 20 m',pres:'2 intentos',u:'s',mejor:'menos',notas:'Salida de pie'}]};
+    const FUE={tipo:'Fuerza',titulo:'Fuerza general A',dur:50,notas:'Técnica antes que carga. Descanso 60-90 s entre series.',ej:[
+      {n:'Sentadilla goblet',pres:'3 × 10',u:'kg',mejor:'mas',notas:'Apunta el peso usado'},
+      {n:'Flexiones',pres:'3 × máx.',u:'reps',mejor:'mas',notas:'Suma total de las 3 series'},
+      {n:'Remo con banda',pres:'3 × 12',u:'-',mejor:'mas',notas:''},
+      {n:'Plancha frontal',pres:'3 × máx.',u:'s',mejor:'mas',notas:'Apunta la mejor serie'},
+      {n:'Zancada alterna',pres:'3 × 8/pierna',u:'-',mejor:'mas',notas:''}]};
+    const RES={tipo:'Resistencia',titulo:'Velocidad y agilidad',dur:40,notas:'Recuperación completa entre sprints.',ej:[
+      {n:'Circuito de agilidad (conos)',pres:'4 rondas',u:'-',mejor:'mas',notas:''},
+      {n:'Sprint 30 m',pres:'6 × 30 m',u:'s',mejor:'menos',notas:'Apunta el mejor tiempo'},
+      {n:'Comba 1 min',pres:'3 × 1 min',u:'reps',mejor:'mas',notas:'Apunta la mejor serie'}]};
+    const plan=[[-21,TEST],[-19,FUE],[-16,RES],[-14,FUE],[-12,RES],[-7,TEST],[-5,FUE],[-2,RES],[0,FUE],[2,RES],[4,FUE],[7,TEST]];
+    const entrenos=plan.map(([d,t],i)=>({id:'e'+i,entrenadorId:'t1',fecha:addDays(h,d),...JSON.parse(JSON.stringify(t)),asignados:all,creado:Date.now()}));
+    const base={'Flexiones en 30 s':14,'Salto horizontal':150,'Plancha frontal':45,'Sprint 20 m':4.1,'Sentadilla goblet':6,'Flexiones':30,'Sprint 30 m':5.6,'Comba 1 min':80};
+    const resultados=[];
+    entrenos.filter(e=>e.fecha<h).forEach((e,k)=>{A.forEach((a,ai)=>{if(rnd()<.15)return;const prog=1+k*0.025;
+      const valores=e.ej.map(x=>{if(x.u==='-')return{hecho:rnd()>.1};let b=base[x.n]*a.f;let v=x.mejor==='menos'?b/prog*(1+(rnd()-.5)*.04):b*prog*(1+(rnd()-.5)*.08);v=x.u==='s'&&x.mejor==='menos'?r1(v*10)/10:Math.round(v);return{v}});
+      const rpe=Math.min(10,Math.max(3,Math.round(5+rnd()*4)));const dolor=(a.id==='a3'&&e.tipo!=='Fuerza'&&rnd()<.6)?'Me molesta la rodilla derecha al saltar':'';
+      resultados.push({id:e.id+'_'+a.id,entrenoId:e.id,atletaId:a.id,entrenadorId:'t1',fecha:e.fecha,ts:Date.now()-(30-k)*864e5,valores,rpe,energia:Math.ceil(2+rnd()*3),sueno:Math.ceil(2+rnd()*3),dolor,comentario:['','Me ha costado la plancha','Muy bien, con ganas','Algo cansado del cole',''][Math.floor(rnd()*5)],comentarioEnt:k===7&&ai===0?'Gran mejora en el salto, Lucas. Sigue cuidando la técnica en la sentadilla.':''})})});
+    const retos=[{id:'r1',entrenadorId:'t1',titulo:'Plancha de 90 segundos',desc:'Consigue aguantar 90 s en plancha frontal con buena técnica.',u:'s',mejor:'mas',objetivo:90,fin:addDays(h,14),asignados:all,creado:Date.now()},
+      {id:'r2',entrenadorId:'t1',titulo:'Sprint 20 m por debajo de 3,8 s',desc:'Salida de pie, cronometrado por el entrenador o un compañero.',u:'s',mejor:'menos',objetivo:3.8,fin:addDays(h,21),asignados:all,creado:Date.now()}];
+    const intentos=[];A.forEach(a=>{[0,1].forEach(j=>{intentos.push({id:'i'+a.id+j,retoId:'r1',atletaId:a.id,entrenadorId:'t1',fecha:addDays(h,-6+j*4),valor:Math.round(50*a.f+j*8+rnd()*10)})});intentos.push({id:'j'+a.id,retoId:'r2',atletaId:a.id,entrenadorId:'t1',fecha:addDays(h,-3),valor:r1(4.1/a.f)})});
+    A.forEach(a=>delete a.f);
+    return{users:[T,...A],entrenos,resultados,retos,intentos};
+  }
+}
+
+/* ============================ BACKEND: Firebase ============================ */
+class FireDB{
+  get demo(){return false}
+  async init(){const v='10.14.1',b=`https://cdn.jsdelivr.net/npm/firebase@${v}/`;
+    for(const f of['firebase-app-compat.js','firebase-auth-compat.js','firebase-firestore-compat.js'])await new Promise((ok,ko)=>{const s=document.createElement('script');s.src=b+f;s.onload=ok;s.onerror=()=>ko(new Error('No se pudo cargar Firebase'));document.head.appendChild(s)});
+    this.app=firebase.initializeApp(FIREBASE_CONFIG);this.auth=firebase.auth();this.fs=firebase.firestore();
+    this.sec=firebase.initializeApp(FIREBASE_CONFIG,'secundaria');}
+  em(u){return norm(u).replace(/[^a-z0-9._-]/g,'')+'@'+DOMINIO_USUARIOS}
+  async _me(u){const s=await this.fs.doc(C('users')+'/'+u.uid).get();if(!s.exists)throw new Error('Cuenta sin perfil. Contacta con tu entrenador.');return{id:u.uid,...s.data()}}
+  session(){return new Promise(res=>{const un=this.auth.onAuthStateChanged(async u=>{un();if(!u)return res(null);try{res(await this._me(u))}catch(e){res(null)}})})}
+  async login(us,p){try{const c=await this.auth.signInWithEmailAndPassword(this.em(us),p);return await this._me(c.user)}catch(e){throw new Error(e.code&&e.code.startsWith('auth/')?'Usuario o contraseña incorrectos':e.message)}}
+  async logout(){await this.auth.signOut()}
+  async registerTrainer(nombre,usuario,pass){const c=await this.auth.createUserWithEmailAndPassword(this.em(usuario),pass).catch(fe);const d={rol:'entrenador',nombre,usuario:norm(usuario),creado:Date.now()};await this.fs.doc(C('users')+'/'+c.user.uid).set(d);return{id:c.user.uid,...d}}
+  async crearAtleta(me,a){const c=await this.sec.auth().createUserWithEmailAndPassword(this.em(a.usuario),a.pass).catch(fe);const id=c.user.uid;await this.sec.auth().signOut();
+    const{pass,...rest}=a;const d={rol:'atleta',entrenadorId:me.id,activo:true,creado:Date.now(),...rest,usuario:norm(a.usuario)};await this.fs.doc(C('users')+'/'+id).set(d);return{id,...d}}
+  async updateUser(id,data){await this.fs.doc(C('users')+'/'+id).update(data)}
+  async cambiarPass(me,p){await this.auth.currentUser.updatePassword(p).catch(fe)}
+  _q(col,f,op,v){return this.fs.collection(col).where(f,op,v).get().then(s=>s.docs.map(d=>({id:d.id,...d.data()})))}
+  async loadAll(me){
+    if(me.rol==='entrenador'){const[atletas,entrenos,resultados,retos,intentos]=await Promise.all([this._q(C('users'),'entrenadorId','==',me.id),this._q(C('entrenos'),'entrenadorId','==',me.id),this._q(C('resultados'),'entrenadorId','==',me.id),this._q(C('retos'),'entrenadorId','==',me.id),this._q(C('intentos'),'entrenadorId','==',me.id)]);return{atletas,entrenos,resultados,retos,intentos}}
+    const[t,entrenos,resultados,retos,intentos]=await Promise.all([this.fs.doc(C('users')+'/'+me.entrenadorId).get(),this._q(C('entrenos'),'asignados','array-contains',me.id),this._q(C('resultados'),'atletaId','==',me.id),this._q(C('retos'),'asignados','array-contains',me.id),this._q(C('intentos'),'atletaId','==',me.id)]);
+    return{entrenador:t.exists?{id:t.id,nombre:t.data().nombre}:null,entrenos,resultados,retos,intentos}}
+  async put(col,o){col=C(col);const id=o.id||this.fs.collection(col).doc().id;const{id:_,...rest}=JSON.parse(JSON.stringify(o));await this.fs.doc(col+'/'+id).set(rest);return id}
+  async del(col,id){col=C(col);await this.fs.doc(col+'/'+id).delete()}
+}
+function fe(e){const m={'auth/email-already-in-use':'Ese usuario ya existe','auth/weak-password':'La contraseña debe tener al menos 6 caracteres','auth/requires-recent-login':'Vuelve a iniciar sesión para cambiar la contraseña','auth/invalid-email':'Usuario no válido (usa letras, números, punto o guion)'};throw new Error(m[e.code]||e.message)}
+
+/* ============================ estado ============================ */
+const db=FIREBASE_CONFIG?new FireDB():new LocalDB();
+let ME=null,D=null,V={v:'',p:{}},hist=[];
+const UI={entSeg:'prox',athSeg:'pend',exSel:null,draft:null};
+
+async function recargar(){D=await db.loadAll(ME);D.atletas=(D.atletas||[]).sort((a,b)=>a.nombre.localeCompare(b.nombre));D.entrenos.sort((a,b)=>a.fecha.localeCompare(b.fecha))}
+function go(v,p={},push=true){if(push&&V.v)hist.push(V);V={v,p};render();window.scrollTo(0,0)}
+function back(){V=hist.pop()||{v:ME.rol==='entrenador'?'panel':'inicio',p:{}};render();window.scrollTo(0,0)}
+async function guardar(fn,msg){try{await fn();await recargar();if(msg)toast(msg);render();return true}catch(e){toast(e.message||'Error al guardar');return false}}
+
+/* ---- consultas ---- */
+const ent=id=>D.entrenos.find(e=>e.id===id);
+const atl=id=>(D.atletas||[]).find(a=>a.id===id);
+const resDe=(eid,aid)=>D.resultados.find(r=>r.entrenoId===eid&&r.atletaId===aid);
+function adherencia(aid){const hoy=HOY();const as=D.entrenos.filter(e=>e.fecha<=hoy&&(e.asignados||[]).includes(aid));if(!as.length)return null;const h=as.filter(e=>resDe(e.id,aid)).length;return{h,t:as.length,p:Math.round(h/as.length*100)}}
+function alertasDe(r){const a=[];if(r.dolor)a.push(['bad','Molestia']);if(r.rpe>=9)a.push(['warn','RPE '+r.rpe]);if(r.energia&&r.energia<=1)a.push(['warn','Sin energía']);return a}
+function series(aid){const m={};D.resultados.filter(r=>r.atletaId===aid).forEach(r=>{const e=ent(r.entrenoId);if(!e)return;e.ej.forEach((x,j)=>{if(x.u==='-')return;const v=num(r.valores?.[j]?.v);if(v==null)return;const k=norm(x.n)+'|'+x.u;(m[k]=m[k]||{n:x.n,u:x.u,mejor:x.mejor,pts:[]}).pts.push({f:r.fecha,v})})});Object.values(m).forEach(s=>s.pts.sort((a,b)=>a.f.localeCompare(b.f)));return Object.entries(m).map(([k,s])=>({k,...s})).sort((a,b)=>b.pts.length-a.pts.length)}
+const best=(s)=>s.pts.reduce((b,p)=>b==null?p.v:(s.mejor==='menos'?Math.min(b,p.v):Math.max(b,p.v)),null);
+const bestInt=(reto,aid)=>{const a=D.intentos.filter(i=>i.retoId===reto.id&&i.atletaId===aid);if(!a.length)return null;return a.reduce((b,i)=>reto.mejor==='menos'?Math.min(b,i.valor):Math.max(b,i.valor),a[0].valor)};
+const logrado=(reto,v)=>v!=null&&reto.objetivo!=null&&(reto.mejor==='menos'?v<=reto.objetivo:v>=reto.objetivo);
+const uTxt=u=>u==='-'?'':u;
+
+/* ============================ render raíz ============================ */
+function render(){
+  const app=$('#app');
+  if(!ME){app.innerHTML=vLogin();bindLogin();$('nav.tabs')?.remove();return}
+  const T=ME.rol==='entrenador';
+  const views=T?{panel:tPanel,atletas:tAtletas,atleta:tAtleta,entrenos:tEntrenos,entreno:tEntreno,editEnt:tEditEnt,retos:tRetos,reto:tReto,editReto:tEditReto,cuenta:vCuenta}
+               :{inicio:aInicio,entrenos:aEntrenos,entreno:aEntreno,registrar:aRegistrar,progreso:aProgreso,retos:aRetos,cuenta:vCuenta};
+  if(!views[V.v])V={v:T?'panel':'inicio',p:{}};
+  app.innerHTML=`<div class="topbar"><div class="in"><div class="brand">Mi<b>Reto</b></div><span class="role ${T?'t':''}">${T?'Entrenador':'Atleta'}</span><div class="sp"></div>
+    <button class="who" onclick="go('cuenta')"><span class="avatar">${ini(ME.nombre)}</span></button></div></div>
+    <div class="shell">${db.demo?`<div class="demo">${ic('alert',16)} Modo demo: los datos se guardan solo en este navegador.</div>`:''}${views[V.v](V.p)}</div>`;
+  let nav=$('nav.tabs');if(!nav){nav=document.createElement('nav');nav.className='tabs';document.body.appendChild(nav)}
+  const tabs=T?[['panel','home','Panel'],['atletas','users','Atletas'],['entrenos','cal','Entrenos'],['retos','flag','Retos']]:[['inicio','home','Inicio'],['entrenos','cal','Entrenos'],['progreso','chart','Progreso'],['retos','flag','Retos']];
+  const grp={atleta:'atletas',entreno:'entrenos',editEnt:'entrenos',registrar:'entrenos',reto:'retos',editReto:'retos'};const cur=grp[V.v]||V.v;
+  nav.innerHTML=`<div class="in">${tabs.map(([k,i,n])=>`<button class="${cur===k?'on':''}" onclick="hist=[];go('${k}',{},false)">${ic(i,22)}${n}</button>`).join('')}</div>`;
+  document.querySelectorAll('[data-chart]').forEach(dibujar);
+}
+const PH=(t,sub,act='',bk=false)=>`${bk?`<button class="back" onclick="back()">${ic('left',18)} Volver</button>`:''}<div class="ph" style="${bk?'margin-top:8px':''}"><div><h1>${t}</h1>${sub?`<div class="sub">${sub}</div>`:''}</div>${act}</div>`;
+const dateBox=iso=>`<div class="date ${iso===HOY()?'today':''}"><small>${dow(iso)}</small><b>${new Date(iso+'T12:00:00').getDate()}</b></div>`;
+
+/* ============================ login ============================ */
+let loginModo='in';
+function vLogin(){const reg=loginModo==='reg';return`<div class="login"><div class="box">
+  <div class="brand">Mi<b>Reto</b></div><p class="mut" style="margin:4px 0 24px">Plataforma de entrenamiento: planificación, registro de resultados y seguimiento.</p>
+  <div class="card">${reg?`<label for="lN">Nombre completo</label><input id="lN" autocomplete="name">`:''}
+  <label for="lU">Usuario</label><input id="lU" autocomplete="username" autocapitalize="none" spellcheck="false">
+  <label for="lP">Contraseña</label><input id="lP" type="password" autocomplete="${reg?'new-password':'current-password'}">
+  <button class="btn pri full" style="margin-top:18px" id="lGo">${reg?'Crear cuenta de entrenador':'Entrar'}</button><div class="err" id="lErr"></div>
+  ${PERMITIR_REGISTRO_ENTRENADOR?`<button class="mut sm" style="width:100%;margin-top:4px" onclick="loginModo='${reg?'in':'reg'}';render()">${reg?'Ya tengo cuenta · Entrar':'¿Eres entrenador? Crea tu cuenta'}</button>`:''}</div>
+  ${db.demo?`<div class="card"><h3 style="font-size:1rem">Modo demo</h3><p class="mut sm" style="margin:0 0 12px">Prueba los dos perfiles con datos de ejemplo:</p>
+   <div class="grid2"><button class="btn" onclick="demoLogin('entrenador')">${ic('dumb',18)} Entrenador</button><button class="btn" onclick="demoLogin('lucas')">${ic('user',18)} Atleta</button></div>
+   <p class="mut sm" style="margin:10px 0 0">Usuarios: entrenador, lucas, marta, hugo, carla · contraseña demo123</p></div>`:''}
+  <p class="mut sm" style="text-align:center">Los atletas reciben su usuario y contraseña de su entrenador.</p></div></div>`}
+function bindLogin(){const go_=async()=>{const u=$('#lU').value.trim(),p=$('#lP').value,b=$('#lGo');$('#lErr').textContent='';if(!u||!p){$('#lErr').textContent='Rellena usuario y contraseña';return}b.disabled=true;
+  try{if(loginModo==='reg'){const n=$('#lN').value.trim();if(!n)throw new Error('Escribe tu nombre');if(p.length<6)throw new Error('La contraseña debe tener al menos 6 caracteres');ME=await db.registerTrainer(n,u,p)}else ME=await db.login(u,p);await entrar()}catch(e){$('#lErr').textContent=e.message;b.disabled=false}};
+  $('#lGo').onclick=go_;$('#lP').onkeydown=e=>{if(e.key==='Enter')go_()}}
+async function demoLogin(u){ME=await db.login(u,'demo123');await entrar()}
+async function entrar(){await recargar();hist=[];V={v:ME.rol==='entrenador'?'panel':'inicio',p:{}};render()}
+
+/* ============================ cuenta ============================ */
+function vCuenta(){return PH('Mi cuenta','','',true)+`<div class="card"><div style="display:flex;gap:14px;align-items:center"><span class="avatar lg">${ini(ME.nombre)}</span><div><h2 style="font-size:1.4rem">${esc(ME.nombre)}</h2><div class="mut sm">Usuario: ${esc(ME.usuario)}${D.entrenador?` · Entrenador: ${esc(D.entrenador.nombre)}`:''}</div></div></div></div>
+  <div class="card"><h3>Cambiar contraseña</h3><input id="cp1" type="password" placeholder="Nueva contraseña (mín. 6)" autocomplete="new-password"><button class="btn full" style="margin-top:10px" onclick="cambiarPass()">Guardar contraseña</button></div>
+  <button class="btn ghost full" onclick="salir()">${ic('out',18)} Cerrar sesión</button>
+  ${db.demo?`<button class="btn danger full" style="margin-top:10px" onclick="confirmar('¿Reiniciar demo?','Se borrarán los cambios y se cargarán los datos de ejemplo.',()=>{db.reset();location.reload()})">Reiniciar datos de demo</button>`:''}`}
+async function cambiarPass(){const p=$('#cp1').value;if(p.length<6){toast('Mínimo 6 caracteres');return}try{await db.cambiarPass(ME,p);toast('Contraseña cambiada');$('#cp1').value=''}catch(e){toast(e.message)}}
+async function salir(){await db.logout();ME=null;D=null;hist=[];V={v:'',p:{}};render()}
+
+/* ============================ modales ============================ */
+function sheet(h){cerrar();const o=document.createElement('div');o.className='ovl';o.id='ovl';o.innerHTML=`<div class="sheet">${h}</div>`;o.onclick=e=>{if(e.target===o)cerrar()};document.body.appendChild(o)}
+function cerrar(){$('#ovl')?.remove()}
+function confirmar(t,txt,ok,lbl='Confirmar'){sheet(`<h2>${t}</h2><p class="mut">${txt}</p><div class="grid2" style="margin-top:16px"><button class="btn" onclick="cerrar()">Cancelar</button><button class="btn danger" id="cOk">${lbl}</button></div>`);$('#cOk').onclick=()=>{cerrar();ok()}}
+
+/* ============================ ENTRENADOR ============================ */
+function tPanel(){const hoy=HOY(),l=lunes(hoy),fin=addDays(l,6);
+  const sem=D.entrenos.filter(e=>e.fecha>=l&&e.fecha<=fin);
+  let asig=0,hech=0;sem.filter(e=>e.fecha<=hoy).forEach(e=>(e.asignados||[]).forEach(a=>{asig++;if(resDe(e.id,a))hech++}));
+  const hace14=addDays(hoy,-14);const rec=D.resultados.filter(r=>r.fecha>=hace14);
+  const al=rec.filter(r=>alertasDe(r).length).sort((a,b)=>b.fecha.localeCompare(a.fecha));
+  const rpeM=avg(rec.map(r=>r.rpe).filter(Boolean));
+  const ult=[...D.resultados].sort((a,b)=>(b.ts||0)-(a.ts||0)).slice(0,6);
+  const prox=D.entrenos.filter(e=>e.fecha>=hoy).slice(0,4);
+  return PH('Hola, '+esc(ME.nombre.split(' ')[0]),fD(hoy,{weekday:'long',day:'numeric',month:'long'}),`<button class="btn pri" onclick="nuevoEnt()">${ic('plus',18)} Entreno</button>`)+`
+  <div class="kpis"><div class="kpi"><div class="v">${D.atletas.filter(a=>a.activo!==false).length}</div><div class="l">Atletas activos</div></div>
+   <div class="kpi"><div class="v">${asig?Math.round(hech/asig*100):'–'}<small>${asig?'%':''}</small></div><div class="l">Cumplimiento semana (${hech}/${asig})</div></div>
+   <div class="kpi"><div class="v">${rpeM?r1(rpeM):'–'}</div><div class="l">RPE medio 14 días</div></div>
+   <div class="kpi"><div class="v" style="color:${al.length?'var(--bad)':'inherit'}">${al.length}</div><div class="l">Alertas 14 días</div></div></div>
+  ${al.length?`<div class="card"><h3>${ic('alert',18)} Requiere atención</h3><div class="list">${al.slice(0,5).map(rowRes).join('')}</div></div>`:''}
+  <div class="card"><h3>${ic('cal',18)} Próximos entrenos</h3><div class="list">${prox.length?prox.map(rowEnt).join(''):'<div class="empty">No hay entrenos programados.</div>'}</div></div>
+  <div class="card"><h3>${ic('msg',18)} Últimos registros</h3><div class="list">${ult.length?ult.map(rowRes).join(''):'<div class="empty">Aún no hay resultados registrados.</div>'}</div></div>`}
+function rowRes(r){const a=atl(r.atletaId),e=ent(r.entrenoId);if(!a||!e)return'';const al=alertasDe(r);
+  return`<button class="row" onclick="verRes('${r.id}')"><span class="avatar">${ini(a.nombre)}</span><div class="m"><b>${esc(a.nombre)}</b><small>${esc(e.titulo)} · ${fD(r.fecha)}${r.rpe?` · RPE ${r.rpe}`:''}</small></div>
+   <div class="btns" style="gap:4px">${al.map(([c,t])=>`<span class="tag ${c}">${t}</span>`).join('')}${r.comentarioEnt?`<span class="tag ok">${ic('check',12)}</span>`:''}</div></button>`}
+function rowEnt(e){const as=(e.asignados||[]).length,h=(e.asignados||[]).filter(a=>resDe(e.id,a)).length;
+  return`<button class="row" onclick="go('entreno',{id:'${e.id}'})">${dateBox(e.fecha)}<div class="m"><b>${esc(e.titulo)}</b><small>${esc(e.tipo)} · ${e.ej.length} ejercicios${e.dur?` · ${e.dur} min`:''}</small></div><span class="tag ${h===as&&as?'ok':''}">${h}/${as}</span></button>`}
+
+/* ---- atletas ---- */
+function tAtletas(){const act=D.atletas.filter(a=>a.activo!==false),inact=D.atletas.filter(a=>a.activo===false);
+  const row=a=>{const ad=adherencia(a.id);const last=D.resultados.filter(r=>r.atletaId===a.id).sort((x,y)=>y.fecha.localeCompare(x.fecha))[0];
+    return`<button class="row" onclick="go('atleta',{id:'${a.id}'})"><span class="avatar">${ini(a.nombre)}</span><div class="m"><b>${esc(a.nombre)}</b><small>@${esc(a.usuario)} · ${last?'último registro '+fD(last.fecha):'sin registros'}</small></div>
+    ${ad?`<span class="tag ${ad.p>=80?'ok':ad.p>=50?'warn':'bad'}">${ad.p}%</span>`:''}${ic('right',18)}</button>`};
+  return PH('Atletas',`${act.length} activos`,`<button class="btn pri" onclick="formAtleta()">${ic('plus',18)} Nuevo</button>`)+
+  `<div class="card"><div class="list">${act.length?act.map(row).join(''):'<div class="empty">Crea el primer atleta para empezar.</div>'}</div></div>
+  ${inact.length?`<div class="card"><h3 class="mut">Inactivos</h3><div class="list">${inact.map(row).join('')}</div></div>`:''}
+  <p class="mut sm">El porcentaje es el cumplimiento: entrenos registrados sobre asignados hasta hoy.</p>`}
+function formAtleta(id){const a=id?atl(id):{};sheet(`<h2>${id?'Editar atleta':'Nuevo atleta'}</h2><p class="mut sm">${id?'':'Crea su acceso: tú le das el usuario y la contraseña.'}</p>
+  <label for="faN">Nombre y apellidos</label><input id="faN" value="${esc(a.nombre)}">
+  ${id?'':`<div class="grid2"><div><label for="faU">Usuario</label><input id="faU" autocapitalize="none" placeholder="lucas.m"></div><div><label for="faP">Contraseña</label><input id="faP" placeholder="mín. 6 caracteres"></div></div>`}
+  <label for="faF">Fecha de nacimiento</label><input id="faF" type="date" value="${esc(a.nacimiento)}">
+  <label for="faO">Notas privadas (solo las ves tú)</label><textarea id="faO" placeholder="Lesiones, consideraciones, objetivos…">${esc(a.notas)}</textarea>
+  ${id?`<label>Estado</label><div class="seg" style="margin:0"><button class="${a.activo!==false?'on':''}" id="faA1">Activo</button><button class="${a.activo===false?'on':''}" id="faA0">Inactivo</button></div>`:''}
+  <button class="btn pri full" style="margin-top:18px" id="faOk">${id?'Guardar':'Crear atleta'}</button><div class="err" id="faE"></div>`);
+  let activo=a.activo!==false;if(id){$('#faA1').onclick=()=>{activo=true;$('#faA1').classList.add('on');$('#faA0').classList.remove('on')};$('#faA0').onclick=()=>{activo=false;$('#faA0').classList.add('on');$('#faA1').classList.remove('on')}}
+  $('#faOk').onclick=async()=>{const n=$('#faN').value.trim();if(!n){$('#faE').textContent='Escribe el nombre';return}const data={nombre:n,nacimiento:$('#faF').value,notas:$('#faO').value.trim()};
+    $('#faOk').disabled=true;
+    try{if(id){await db.updateUser(id,{...data,activo})}else{const u=$('#faU').value.trim(),p=$('#faP').value;if(!u||p.length<6)throw new Error('Usuario y contraseña (mín. 6) obligatorios');const na=await db.crearAtleta(ME,{...data,usuario:u,pass:p});cerrar();await recargar();render();credenciales(na.nombre,na.usuario,p);return}
+      cerrar();await recargar();render();toast('Guardado')}catch(e){$('#faE').textContent=e.message;$('#faOk').disabled=false}}}
+function credenciales(n,u,p){const t=`Hola ${n.split(' ')[0]}, este es tu acceso a MiReto:\n${location.href.split('#')[0]}\nUsuario: ${u}\nContraseña: ${p}`;
+  sheet(`<h2>Atleta creado</h2><p class="mut">Envíale estos datos de acceso (a él o a su familia):</p><textarea id="crT" readonly style="min-height:110px">${esc(t)}</textarea>
+  <button class="btn pri full" style="margin-top:10px" onclick="copiar($('#crT').value)">${ic('copy',18)} Copiar</button><p class="mut sm">Apunta la contraseña: por seguridad no se vuelve a mostrar.</p>`)}
+async function copiar(t){try{await navigator.clipboard.writeText(t);toast('Copiado')}catch(e){const x=$('#crT')||$('textarea[readonly]');x&&x.select();toast('Selecciona y copia')}}
+
+function tAtleta({id}){const a=atl(id);if(!a)return'<div class="empty">Atleta no encontrado</div>';
+  const ad=adherencia(id);const rs=D.resultados.filter(r=>r.atletaId===id).sort((x,y)=>y.fecha.localeCompare(x.fecha));
+  const ult=rs.slice(0,8);const rpe=avg(ult.map(r=>r.rpe).filter(Boolean)),ene=avg(ult.map(r=>r.energia).filter(Boolean));
+  const edad=a.nacimiento?Math.floor((Date.now()-new Date(a.nacimiento))/31557600000):null;
+  const ss=series(id);
+  return PH(esc(a.nombre),`@${esc(a.usuario)}${edad!=null?` · ${edad} años`:''}${a.activo===false?' · inactivo':''}`,`<button class="btn sm ghost" onclick="formAtleta('${id}')">${ic('edit',16)} Editar</button>`,true)+`
+  ${a.notas?`<div class="note acc" style="margin-bottom:12px"><b>Notas privadas</b>${esc(a.notas)}</div>`:''}
+  <div class="kpis"><div class="kpi"><div class="v">${ad?ad.p:'–'}<small>${ad?'%':''}</small></div><div class="l">Cumplimiento${ad?` (${ad.h}/${ad.t})`:''}</div></div>
+   <div class="kpi"><div class="v">${rs.length}</div><div class="l">Entrenos registrados</div></div>
+   <div class="kpi"><div class="v">${rpe?r1(rpe):'–'}</div><div class="l">RPE medio (últ. 8)</div></div>
+   <div class="kpi"><div class="v">${ene?r1(ene):'–'}<small>/5</small></div><div class="l">Energía media (últ. 8)</div></div></div>
+  ${chartCard(ss,'atl_'+id)}
+  ${ult.length?`<div class="card"><h3>Carga percibida (RPE)</h3><div data-chart="rpe" data-a="${id}"></div></div>`:''}
+  <div class="card"><h3>Historial</h3><div class="list">${rs.length?rs.map(r=>{const e=ent(r.entrenoId);if(!e)return'';const al=alertasDe(r);return`<button class="row" onclick="verRes('${r.id}')">${dateBox(r.fecha)}<div class="m"><b>${esc(e.titulo)}</b><small>RPE ${r.rpe||'–'} · energía ${r.energia||'–'}/5${r.comentario?' · “'+esc(r.comentario.slice(0,40))+'”':''}</small></div><div class="btns" style="gap:4px">${al.map(([c,t])=>`<span class="tag ${c}">${t}</span>`).join('')}</div></button>`}).join(''):'<div class="empty">Sin registros todavía.</div>'}</div></div>
+  <button class="btn ghost full" onclick="credInfo('${id}')">Datos de acceso</button>`}
+function credInfo(id){const a=atl(id);sheet(`<h2>Acceso de ${esc(a.nombre.split(' ')[0])}</h2><p>Usuario: <b>${esc(a.usuario)}</b></p><p class="mut sm">La contraseña no se guarda visible. Si la ha olvidado: ${db.demo?'en demo es demo123.':'restablécela desde la consola de Firebase (Authentication → usuario '+esc(a.usuario)+'@'+DOMINIO_USUARIOS+'), o pídele que la cambie desde "Mi cuenta" si aún puede entrar.'}</p><button class="btn full" onclick="cerrar()">Cerrar</button>`)}
+
+function chartCard(ss,key){if(!ss.length)return`<div class="card"><h3>Evolución</h3><div class="empty">Cuando registre resultados numéricos verás aquí su evolución.</div></div>`;
+  if(!UI.exSel||!ss.find(s=>s.k===UI.exSel))UI.exSel=ss[0].k;const s=ss.find(x=>x.k===UI.exSel);const b=best(s);const first=s.pts[0].v,last=s.pts[s.pts.length-1].v;
+  const dif=r1(last-first);const mej=s.pts.length>1&&(s.mejor==='menos'?dif<0:dif>0);
+  return`<div class="card"><h3>Evolución por ejercicio</h3><div class="pills" style="margin-bottom:12px">${ss.slice(0,12).map(x=>`<button class="${x.k===UI.exSel?'on':''}" data-k="${esc(x.k)}" onclick="UI.exSel=this.dataset.k;render()">${esc(x.n)}</button>`).join('')}</div>
+   <div class="grid2" style="grid-template-columns:repeat(3,1fr);margin-bottom:8px"><div><div class="mut sm">Mejor marca</div><div class="cond" style="font-size:1.5rem;color:var(--acc)">${b} ${uTxt(s.u)}</div></div><div><div class="mut sm">Última</div><div class="cond" style="font-size:1.5rem">${last} ${uTxt(s.u)}</div></div><div><div class="mut sm">Desde el inicio</div><div class="cond" style="font-size:1.5rem;color:${s.pts.length<2?'var(--mut)':mej?'var(--ok)':'var(--warn)'}">${s.pts.length<2?'–':(dif>0?'+':'')+dif}</div></div></div>
+   <div data-chart="ex" data-s='${esc(JSON.stringify(s))}'></div><div class="mut sm">${s.mejor==='menos'?'En este ejercicio, menos es mejor.':''}</div></div>`}
+
+/* ---- ver/comentar resultado ---- */
+function verRes(rid){const r=D.resultados.find(x=>x.id===rid);const e=ent(r.entrenoId);const a=ME.rol==='entrenador'?atl(r.atletaId):ME;
+  const T=ME.rol==='entrenador';
+  sheet(`<h2>${esc(e.titulo)}</h2><div class="mut sm">${T?esc(a.nombre)+' · ':''}${fD(r.fecha,{weekday:'long',day:'numeric',month:'long'})}</div>
+  <div class="grid2" style="grid-template-columns:repeat(3,1fr);margin:14px 0"><div class="kpi"><div class="v">${r.rpe||'–'}</div><div class="l">RPE</div></div><div class="kpi"><div class="v">${r.energia||'–'}<small>/5</small></div><div class="l">Energía</div></div><div class="kpi"><div class="v">${r.sueno||'–'}<small>/5</small></div><div class="l">Descanso</div></div></div>
+  <div class="card">${e.ej.map((x,j)=>{const v=r.valores?.[j]||{};return`<div class="ex"><div class="n">${j+1}</div><div><b>${esc(x.n)}</b><small>${esc(x.pres)}</small>${v.nota?`<small style="color:var(--tx)">“${esc(v.nota)}”</small>`:''}</div><div class="p">${x.u==='-'?(v.hecho?`<span class="tag ok">Hecho</span>`:`<span class="tag">No</span>`):(v.v!=null&&v.v!==''?esc(v.v)+' <small style="display:inline;font-size:.8rem">'+x.u+'</small>':'<span class="mut">–</span>')}</div></div>`}).join('')}</div>
+  ${r.dolor?`<div class="note bad" style="margin-bottom:10px"><b>Molestias</b>${esc(r.dolor)}</div>`:''}
+  ${r.comentario?`<div class="note" style="margin-bottom:10px"><b>Comentario del atleta</b>${esc(r.comentario)}</div>`:''}
+  ${T?`<label for="rcT">Tu comentario (lo verá el atleta)</label><textarea id="rcT" placeholder="Feedback, ajustes para la próxima…">${esc(r.comentarioEnt)}</textarea><button class="btn pri full" style="margin-top:10px" id="rcOk">Guardar comentario</button>`
+     :r.comentarioEnt?`<div class="note acc"><b>Comentario del entrenador</b>${esc(r.comentarioEnt)}</div>`:''}
+  ${!T?`<button class="btn ghost full" style="margin-top:12px" onclick="cerrar();go('registrar',{id:'${e.id}'})">${ic('edit',16)} Editar mi registro</button>`:''}`);
+  if(T)$('#rcOk').onclick=async()=>{r.comentarioEnt=$('#rcT').value.trim();r.comentarioTs=Date.now();if(await guardar(()=>db.put('resultados',r),'Comentario guardado'))cerrar()}}
+
+/* ---- entrenos (entrenador) ---- */
+function tEntrenos(){const hoy=HOY();const p=UI.entSeg==='prox';const l=p?D.entrenos.filter(e=>e.fecha>=hoy):D.entrenos.filter(e=>e.fecha<hoy).reverse();
+  return PH('Entrenos','',`<button class="btn pri" onclick="nuevoEnt()">${ic('plus',18)} Nuevo</button>`)+`
+  <div class="seg"><button class="${p?'on':''}" onclick="UI.entSeg='prox';render()">Próximos</button><button class="${!p?'on':''}" onclick="UI.entSeg='pas';render()">Pasados</button></div>
+  <div class="card"><div class="list">${l.length?l.map(rowEnt).join(''):`<div class="empty">${p?'No hay entrenos programados. Crea uno nuevo.':'Sin entrenos pasados.'}</div>`}</div></div>`}
+function tEntreno({id}){const e=ent(id);if(!e)return'<div class="empty">Entreno no encontrado</div>';const as=(e.asignados||[]).map(atl).filter(Boolean);
+  return PH(esc(e.titulo),`${fD(e.fecha,{weekday:'long',day:'numeric',month:'long'})} · ${esc(e.tipo)}${e.dur?` · ${e.dur} min`:''}`,'',true)+`
+  <div class="btns" style="margin-bottom:12px"><button class="btn sm" onclick="go('editEnt',{id:'${id}'})">${ic('edit',16)} Editar</button><button class="btn sm" onclick="duplicar('${id}')">${ic('copy',16)} Duplicar</button><button class="btn sm danger" onclick="confirmar('¿Eliminar entreno?','Se eliminará el entreno para todos los atletas asignados.',()=>guardar(()=>db.del('entrenos','${id}'),'Eliminado').then(back),'Eliminar')">${ic('trash',16)}</button></div>
+  ${e.notas?`<div class="note" style="margin-bottom:12px"><b>Indicaciones</b>${esc(e.notas).replace(/\n/g,'<br>')}</div>`:''}
+  <div class="card"><h3>Ejercicios</h3>${exList(e)}</div>
+  <div class="card"><h3>Atletas (${as.filter(a=>resDe(id,a.id)).length}/${as.length})</h3><div class="list">${as.map(a=>{const r=resDe(id,a.id);
+   return r?`<button class="row" onclick="verRes('${r.id}')"><span class="avatar">${ini(a.nombre)}</span><div class="m"><b>${esc(a.nombre)}</b><small>RPE ${r.rpe||'–'} · energía ${r.energia||'–'}/5</small></div>${alertasDe(r).map(([c,t])=>`<span class="tag ${c}">${t}</span>`).join('')}<span class="tag ok">Hecho</span></button>`
+   :`<div class="row"><span class="avatar">${ini(a.nombre)}</span><div class="m"><b>${esc(a.nombre)}</b></div><span class="tag ${e.fecha<HOY()?'bad':''}">${e.fecha<HOY()?'No registrado':'Pendiente'}</span></div>`}).join('')||'<div class="empty">Sin atletas asignados</div>'}</div></div>`}
+function exList(e){return e.ej.map((x,j)=>`<div class="ex"><div class="n">${j+1}</div><div><b>${esc(x.n)}</b>${x.notas?`<small>${esc(x.notas)}</small>`:''}<small>Registrar: ${x.u==='-'?'hecho / no hecho':UNIDADES.find(u=>u[0]===x.u)[1].toLowerCase()}${x.u!=='-'&&x.mejor==='menos'?' (menos es mejor)':''}</small></div><div class="p">${esc(x.pres)}</div></div>`).join('')}
+function nuevoEnt(){UI.draft=null;go('editEnt',{})}
+async function duplicar(id){const e=JSON.parse(JSON.stringify(ent(id)));delete e.id;e.fecha=addDays(HOY(),1);e.titulo+=' (copia)';UI.draft=e;go('editEnt',{dup:1})}
+
+function tEditEnt({id}){
+  if(!UI.draft||UI.draft._for!==(id||'new')){const e=id?JSON.parse(JSON.stringify(ent(id))):(UI.draft&&!UI.draft._for?UI.draft:{titulo:'',tipo:'Fuerza',fecha:HOY(),dur:45,notas:'',ej:[{n:'',pres:'',u:'reps',mejor:'mas',notas:''}],asignados:D.atletas.filter(a=>a.activo!==false).map(a=>a.id)});e._for=id||'new';UI.draft=e}
+  const e=UI.draft;
+  return PH(id?'Editar entreno':'Nuevo entreno','','',true)+`
+  <div class="card"><label for="eT">Título</label><input id="eT" value="${esc(e.titulo)}" placeholder="Ej: Fuerza general A" oninput="UI.draft.titulo=this.value">
+   <div class="grid2"><div><label for="eF">Fecha</label><input id="eF" type="date" value="${e.fecha}" onchange="UI.draft.fecha=this.value"></div>
+   <div><label for="eD">Duración (min)</label><input id="eD" type="number" inputmode="numeric" value="${e.dur||''}" oninput="UI.draft.dur=+this.value||null"></div></div>
+   <label for="eTi">Tipo</label><select id="eTi" onchange="UI.draft.tipo=this.value">${TIPOS.map(t=>`<option ${t===e.tipo?'selected':''}>${t}</option>`).join('')}</select>
+   <label for="eN">Indicaciones generales (calentamiento, objetivos…)</label><textarea id="eN" oninput="UI.draft.notas=this.value">${esc(e.notas)}</textarea></div>
+  <div class="ph" style="margin:18px 0 10px"><h2 style="font-size:1.4rem">Ejercicios</h2><button class="btn sm" onclick="addEx()">${ic('plus',16)} Añadir</button></div>
+  ${e.ej.map((x,j)=>`<div class="exrow"><div style="display:flex;gap:8px;align-items:center"><span class="cond" style="color:var(--acc);font-size:1.2rem;width:20px">${j+1}</span><input value="${esc(x.n)}" placeholder="Nombre del ejercicio" oninput="UI.draft.ej[${j}].n=this.value">
+     <button class="btn sm ghost" title="Subir" onclick="movEx(${j},-1)" ${j?'':'disabled'}>↑</button><button class="btn sm danger" onclick="delEx(${j})">${ic('trash',15)}</button></div>
+    <div class="g"><div><label>Prescripción</label><input value="${esc(x.pres)}" placeholder="3 × 10" oninput="UI.draft.ej[${j}].pres=this.value"></div>
+     <div><label>Registra</label><select onchange="UI.draft.ej[${j}].u=this.value;render()">${UNIDADES.map(([k,n])=>`<option value="${k}" ${k===x.u?'selected':''}>${n}</option>`).join('')}</select></div>
+     <div><label>Mejor</label><select ${x.u==='-'?'disabled':''} onchange="UI.draft.ej[${j}].mejor=this.value"><option value="mas" ${x.mejor!=='menos'?'selected':''}>Más</option><option value="menos" ${x.mejor==='menos'?'selected':''}>Menos</option></select></div></div>
+    <label>Indicación para el atleta</label><input value="${esc(x.notas)}" placeholder="Opcional: técnica, qué apuntar…" oninput="UI.draft.ej[${j}].notas=this.value"></div>`).join('')}
+  <div class="card" style="margin-top:14px"><div style="display:flex;justify-content:space-between;align-items:center"><h3 style="margin:0">Asignar a</h3><button class="btn sm ghost" onclick="toggleTodos()">Todos / ninguno</button></div><div style="margin-top:10px">
+   ${D.atletas.filter(a=>a.activo!==false||e.asignados.includes(a.id)).map(a=>{const on=e.asignados.includes(a.id);return`<button class="athl-check ${on?'on':''}" onclick="togAs('${a.id}')"><span class="bx">${on?ic('check',14):''}</span><span class="avatar">${ini(a.nombre)}</span><b>${esc(a.nombre)}</b></button>`}).join('')||'<div class="empty">Primero crea atletas</div>'}</div></div>
+  <button class="btn pri full" onclick="guardarEnt('${id||''}')">${ic('check',18)} ${id?'Guardar cambios':'Publicar entreno'}</button>`}
+function addEx(){UI.draft.ej.push({n:'',pres:'',u:'reps',mejor:'mas',notas:''});render();setTimeout(()=>{const r=document.querySelectorAll('.exrow');r[r.length-1]?.querySelector('input')?.focus()},50)}
+function delEx(j){UI.draft.ej.splice(j,1);render()}
+function movEx(j,d){const a=UI.draft.ej;[a[j],a[j+d]]=[a[j+d],a[j]];render()}
+function togAs(id){const a=UI.draft.asignados;const i=a.indexOf(id);i>=0?a.splice(i,1):a.push(id);render()}
+function toggleTodos(){const act=D.atletas.filter(a=>a.activo!==false).map(a=>a.id);UI.draft.asignados=UI.draft.asignados.length>=act.length?[]:act;render()}
+async function guardarEnt(id){const e=UI.draft;e.ej=e.ej.filter(x=>x.n.trim());if(!e.titulo.trim()){toast('Ponle un título');return}if(!e.ej.length){toast('Añade al menos un ejercicio');e.ej.push({n:'',pres:'',u:'reps',mejor:'mas',notas:''});return}
+  const{_for,...o}=e;o.entrenadorId=ME.id;o.titulo=o.titulo.trim();if(id)o.id=id;else o.creado=Date.now();
+  if(await guardar(()=>db.put('entrenos',o),id?'Entreno actualizado':'Entreno publicado')){UI.draft=null;hist=hist.filter(h=>h.v!=='editEnt');V={v:'entrenos',p:{}};UI.entSeg=o.fecha>=HOY()?'prox':'pas';hist=[];render()}}
+
+/* ---- retos (entrenador) ---- */
+function tRetos(){const hoy=HOY();const act=D.retos.filter(r=>!r.fin||r.fin>=hoy),pas=D.retos.filter(r=>r.fin&&r.fin<hoy);
+  const row=r=>{const as=(r.asignados||[]);const ok=as.filter(a=>logrado(r,bestInt(r,a))).length;return`<button class="row" onclick="go('reto',{id:'${r.id}'})"><div class="avatar" style="color:var(--acc)">${ic('flag',18)}</div><div class="m"><b>${esc(r.titulo)}</b><small>Objetivo ${r.objetivo??'–'} ${uTxt(r.u)}${r.fin?' · hasta '+fD(r.fin):''}</small></div><span class="tag ${ok?'ok':''}">${ok}/${as.length} logrado</span></button>`};
+  return PH('Retos','Objetivos medibles con fecha límite',`<button class="btn pri" onclick="go('editReto',{})">${ic('plus',18)} Nuevo</button>`)+
+  `<div class="card"><h3>Activos</h3><div class="list">${act.length?act.map(row).join(''):'<div class="empty">No hay retos activos.</div>'}</div></div>${pas.length?`<div class="card"><h3 class="mut">Finalizados</h3><div class="list">${pas.map(row).join('')}</div></div>`:''}`}
+function tReto({id}){const r=D.retos.find(x=>x.id===id);if(!r)return'';const as=(r.asignados||[]).map(atl).filter(Boolean).map(a=>({a,b:bestInt(r,a.id),n:D.intentos.filter(i=>i.retoId===id&&i.atletaId===a.id).length})).sort((x,y)=>x.b==null?1:y.b==null?-1:r.mejor==='menos'?x.b-y.b:y.b-x.b);
+  return PH(esc(r.titulo),`Objetivo: ${r.objetivo??'–'} ${uTxt(r.u)} (${r.mejor==='menos'?'menos es mejor':'más es mejor'})${r.fin?' · hasta '+fD(r.fin):''}`,'',true)+`
+  <div class="btns" style="margin-bottom:12px"><button class="btn sm" onclick="go('editReto',{id:'${id}'})">${ic('edit',16)} Editar</button><button class="btn sm danger" onclick="confirmar('¿Eliminar reto?','Se borrará para todos los atletas.',()=>guardar(()=>db.del('retos','${id}'),'Eliminado').then(back),'Eliminar')">${ic('trash',16)}</button></div>
+  ${r.desc?`<div class="note" style="margin-bottom:12px"><b>Descripción</b>${esc(r.desc)}</div>`:''}
+  <div class="card"><h3>Progreso del grupo</h3><table><thead><tr><th>Atleta</th><th>Mejor</th><th>Intentos</th><th></th></tr></thead><tbody>
+  ${as.map(({a,b,n})=>`<tr><td><b>${esc(a.nombre)}</b></td><td class="cond" style="font-size:1.15rem">${b??'–'} ${b!=null?uTxt(r.u):''}</td><td class="mut">${n}</td><td>${logrado(r,b)?'<span class="tag ok">Logrado</span>':b!=null&&r.objetivo?`<div class="bar" style="width:70px"><i style="width:${Math.min(100,Math.round((r.mejor==='menos'?r.objetivo/b:b/r.objetivo)*100))}%"></i></div>`:''}</td></tr>`).join('')}</tbody></table></div>
+  <p class="mut sm">Los atletas apuntan sus intentos desde su app. Esta tabla solo la ves tú.</p>`}
+function tEditReto({id}){const r=id?D.retos.find(x=>x.id===id):{titulo:'',desc:'',u:'s',mejor:'mas',objetivo:'',fin:addDays(HOY(),14),asignados:D.atletas.filter(a=>a.activo!==false).map(a=>a.id)};
+  UI.retoAs=UI.retoAs&&UI.retoAs._id===(id||'n')?UI.retoAs:Object.assign([...r.asignados],{_id:id||'n'});
+  return PH(id?'Editar reto':'Nuevo reto','','',true)+`<div class="card"><label for="rT">Título</label><input id="rT" value="${esc(r.titulo)}" placeholder="Ej: Plancha de 90 segundos">
+  <label for="rD">Descripción / cómo se mide</label><textarea id="rD">${esc(r.desc)}</textarea>
+  <div class="grid2"><div><label for="rU">Unidad</label><select id="rU">${UNIDADES.filter(u=>u[0]!=='-').map(([k,n])=>`<option value="${k}" ${k===r.u?'selected':''}>${n}</option>`).join('')}</select></div>
+  <div><label for="rM">Mejor</label><select id="rM"><option value="mas" ${r.mejor!=='menos'?'selected':''}>Más es mejor</option><option value="menos" ${r.mejor==='menos'?'selected':''}>Menos es mejor</option></select></div>
+  <div><label for="rO">Objetivo</label><input id="rO" type="number" step="any" inputmode="decimal" value="${r.objetivo??''}"></div><div><label for="rF">Fecha límite</label><input id="rF" type="date" value="${r.fin||''}"></div></div></div>
+  <div class="card"><h3>Asignar a</h3>${D.atletas.filter(a=>a.activo!==false).map(a=>{const on=UI.retoAs.includes(a.id);return`<button class="athl-check ${on?'on':''}" onclick="const i=UI.retoAs.indexOf('${a.id}');i>=0?UI.retoAs.splice(i,1):UI.retoAs.push('${a.id}');this.classList.toggle('on');this.querySelector('.bx').innerHTML=this.classList.contains('on')?ic('check',14):''"><span class="bx">${on?ic('check',14):''}</span><span class="avatar">${ini(a.nombre)}</span><b>${esc(a.nombre)}</b></button>`}).join('')}</div>
+  <button class="btn pri full" onclick="guardarReto('${id||''}')">${id?'Guardar':'Publicar reto'}</button>`}
+async function guardarReto(id){const t=$('#rT').value.trim();if(!t){toast('Ponle un título');return}
+  const o={...(id?D.retos.find(x=>x.id===id):{creado:Date.now()}),entrenadorId:ME.id,titulo:t,desc:$('#rD').value.trim(),u:$('#rU').value,mejor:$('#rM').value,objetivo:num($('#rO').value),fin:$('#rF').value||null,asignados:[...UI.retoAs]};
+  if(await guardar(()=>db.put('retos',o),id?'Reto actualizado':'Reto publicado')){UI.retoAs=null;hist=[];V={v:'retos',p:{}};render()}}
+
+/* ============================ ATLETA ============================ */
+function pendientes(){const hoy=HOY();return D.entrenos.filter(e=>!resDe(e.id,ME.id))}
+function aInicio(){const hoy=HOY();const pend=pendientes();const atras=pend.filter(e=>e.fecha<hoy);const next=pend.find(e=>e.fecha>=hoy);
+  const ad=adherenciaA();const coms=D.resultados.filter(r=>r.comentarioEnt).sort((a,b)=>(b.comentarioTs||b.ts||0)-(a.comentarioTs||a.ts||0));
+  const retos=D.retos.filter(r=>!r.fin||r.fin>=hoy);
+  return PH('Hola, '+esc(ME.nombre.split(' ')[0]),fD(hoy,{weekday:'long',day:'numeric',month:'long'}))+`
+  ${next?`<div class="hero"><div class="k">${next.fecha===hoy?'Entreno de hoy':'Próximo entreno · '+fD(next.fecha,{weekday:'long',day:'numeric'})}</div><h2>${esc(next.titulo)}</h2><div class="mut sm">${esc(next.tipo)} · ${next.ej.length} ejercicios${next.dur?` · ${next.dur} min`:''}</div>
+   <div class="btns" style="margin-top:14px"><button class="btn pri" onclick="go('entreno',{id:'${next.id}'})">Ver entreno</button>${next.fecha<=hoy?`<button class="btn" onclick="go('registrar',{id:'${next.id}'})">Registrar</button>`:''}</div></div>`
+   :`<div class="hero"><div class="k">Al día</div><h2>No tienes entrenos pendientes</h2><div class="mut sm">Tu entrenador publicará los próximos pronto.</div></div>`}
+  ${atras.length?`<div class="card"><h3 style="color:var(--warn)">${ic('alert',18)} Pendientes de registrar (${atras.length})</h3><div class="list">${atras.slice(-4).reverse().map(e=>`<button class="row" onclick="go('registrar',{id:'${e.id}'})">${dateBox(e.fecha)}<div class="m"><b>${esc(e.titulo)}</b><small>Registra cómo te fue</small></div>${ic('right',18)}</button>`).join('')}</div></div>`:''}
+  <div class="kpis"><div class="kpi"><div class="v">${D.resultados.length}</div><div class="l">Entrenos completados</div></div><div class="kpi"><div class="v">${ad?ad.p:'–'}<small>${ad?'%':''}</small></div><div class="l">Cumplimiento</div></div><div class="kpi"><div class="v">${records().length}</div><div class="l">Récords personales</div></div></div>
+  ${coms[0]?`<div class="card"><h3>${ic('msg',18)} Último mensaje de tu entrenador</h3><div class="note acc"><b>${esc(ent(coms[0].entrenoId)?.titulo||'')} · ${fD(coms[0].fecha)}</b>${esc(coms[0].comentarioEnt)}</div></div>`:''}
+  ${retos.length?`<div class="card"><h3>${ic('flag',18)} Retos activos</h3><div class="list">${retos.map(rowRetoA).join('')}</div></div>`:''}`}
+function adherenciaA(){return adherencia(ME.id)}
+function records(){return series(ME.id).filter(s=>s.pts.length>1&&best(s)===s.pts[s.pts.length-1].v&&s.pts.slice(0,-1).every(p=>p.v!==s.pts[s.pts.length-1].v))}
+function rowRetoA(r){const b=bestInt(r,ME.id);const ok=logrado(r,b);const pct=b!=null&&r.objetivo?Math.min(100,Math.round((r.mejor==='menos'?r.objetivo/b:b/r.objetivo)*100)):0;
+  return`<button class="row" onclick="go('retos')"><div class="m"><b>${esc(r.titulo)}</b><div class="bar ${ok?'ok':''}" style="margin:6px 0 4px"><i style="width:${ok?100:pct}%"></i></div><small>${b!=null?`Tu mejor: ${b} ${uTxt(r.u)}`:'Sin intentos'} · objetivo ${r.objetivo??'–'} ${uTxt(r.u)}</small></div>${ok?'<span class="tag ok">Logrado</span>':''}</button>`}
+
+function aEntrenos(){const hoy=HOY();const p=UI.athSeg==='pend';const pend=pendientes();
+  const l=p?pend:D.resultados.map(r=>ent(r.entrenoId)).filter(Boolean).sort((a,b)=>b.fecha.localeCompare(a.fecha));
+  return PH('Mis entrenos')+`<div class="seg"><button class="${p?'on':''}" onclick="UI.athSeg='pend';render()">Pendientes (${pend.length})</button><button class="${!p?'on':''}" onclick="UI.athSeg='hech';render()">Completados (${D.resultados.length})</button></div>
+  <div class="card"><div class="list">${l.length?l.map(e=>{const r=resDe(e.id,ME.id);return`<button class="row" onclick="go('entreno',{id:'${e.id}'})">${dateBox(e.fecha)}<div class="m"><b>${esc(e.titulo)}</b><small>${esc(e.tipo)} · ${e.ej.length} ejercicios${r?` · RPE ${r.rpe||'–'}`:''}</small></div>${r?(r.comentarioEnt?`<span class="tag acc">${ic('msg',12)}</span>`:'')+'<span class="tag ok">Hecho</span>':e.fecha<hoy?'<span class="tag warn">Sin registrar</span>':e.fecha===hoy?'<span class="tag acc">Hoy</span>':''}</button>`}).join(''):`<div class="empty">${p?'¡Estás al día!':'Aún no has completado ningún entreno.'}</div>`}</div></div>`}
+function aEntreno({id}){const e=ent(id);if(!e)return'<div class="empty">Entreno no disponible</div>';const r=resDe(id,ME.id);
+  return PH(esc(e.titulo),`${fD(e.fecha,{weekday:'long',day:'numeric',month:'long'})} · ${esc(e.tipo)}${e.dur?` · ${e.dur} min`:''}`,'',true)+`
+  ${e.notas?`<div class="note" style="margin-bottom:12px"><b>Indicaciones</b>${esc(e.notas).replace(/\n/g,'<br>')}</div>`:''}
+  <div class="card"><h3>Ejercicios</h3>${exList(e)}</div>
+  ${r?`${r.comentarioEnt?`<div class="note acc" style="margin-bottom:12px"><b>Comentario de tu entrenador</b>${esc(r.comentarioEnt)}</div>`:''}<button class="btn full" onclick="verRes('${r.id}')">Ver mi registro</button>`
+    :`<button class="btn pri full" onclick="go('registrar',{id:'${id}'})">${ic('check',18)} Registrar resultados</button>${e.fecha>HOY()?'<p class="mut sm" style="text-align:center">Puedes registrarlo cuando lo hagas.</p>':''}`}`}
+
+let REG=null;
+function aRegistrar({id}){const e=ent(id);const prev=resDe(id,ME.id);
+  if(!REG||REG._id!==id){REG=prev?JSON.parse(JSON.stringify(prev)):{entrenoId:id,valores:e.ej.map(x=>x.u==='-'?{hecho:true}:{v:''}),rpe:null,energia:null,sueno:null,dolor:'',comentario:''};REG._id=id;while(REG.valores.length<e.ej.length)REG.valores.push({})}
+  const scale=(k,n,lo,hi)=>`<div class="scale">${Array.from({length:n},(_,i)=>i+1).map(v=>`<button class="${REG[k]===v?'on':''}" onclick="REG.${k}=${v};this.parentNode.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b===this))${k==='rpe'?";$('#rpeT').textContent=RPE_TXT["+v+"]||''":''}">${v}</button>`).join('')}</div><div class="scale-l"><span>${lo}</span><span>${hi}</span></div>`;
+  return PH('Registrar',esc(e.titulo)+' · '+fD(e.fecha),'',true)+`
+  <div class="card"><h3>Resultados</h3>${e.ej.map((x,j)=>{const v=REG.valores[j];return`<div style="padding:10px 0;border-bottom:1px solid var(--line)"><div style="display:flex;justify-content:space-between;gap:10px"><b>${j+1}. ${esc(x.n)}</b><span class="cond" style="color:var(--acc)">${esc(x.pres)}</span></div>${x.notas?`<div class="mut sm">${esc(x.notas)}</div>`:''}
+    <div style="margin-top:8px">${x.u==='-'?`<button class="check ${v.hecho?'on':''}" onclick="REG.valores[${j}].hecho=!REG.valores[${j}].hecho;this.classList.toggle('on');this.querySelector('.bx').innerHTML=REG.valores[${j}].hecho?ic('check',14):''"><span class="bx">${v.hecho?ic('check',14):''}</span>Completado</button>`
+    :`<div class="inrow"><input type="number" step="any" inputmode="decimal" value="${esc(v.v)}" placeholder="Tu resultado" oninput="REG.valores[${j}].v=this.value"><span class="unit">${x.u}</span></div>`}
+    <input style="margin-top:6px;padding:8px 10px;font-size:.9rem" value="${esc(v.nota)}" placeholder="Nota (opcional)" oninput="REG.valores[${j}].nota=this.value"></div></div>`}).join('')}</div>
+  <div class="card"><h3>Sensaciones</h3>
+   <label>Esfuerzo percibido (RPE) · <span id="rpeT" style="color:var(--acc)">${RPE_TXT[REG.rpe]||''}</span></label>${scale('rpe',10,'Muy fácil','Máximo')}
+   <label>Energía</label>${scale('energia',5,'Sin energía','A tope')}
+   <label>Descanso / sueño anoche</label>${scale('sueno',5,'Muy mal','Muy bien')}
+   <label for="rgD">¿Alguna molestia o dolor?</label><input id="rgD" value="${esc(REG.dolor)}" placeholder="Déjalo vacío si todo bien" oninput="REG.dolor=this.value">
+   <label for="rgC">Comentario para tu entrenador</label><textarea id="rgC" placeholder="Qué te ha costado, cómo te has sentido…" oninput="REG.comentario=this.value">${esc(REG.comentario)}</textarea></div>
+  <button class="btn pri full" onclick="guardarReg()">${ic('check',18)} Guardar registro</button>`}
+async function guardarReg(){const e=ent(REG._id);if(!REG.rpe){toast('Indica el esfuerzo (RPE)');return}
+  const antes=series(ME.id);
+  const{_id,...o}=REG;Object.assign(o,{id:e.id+'_'+ME.id,entrenoId:e.id,atletaId:ME.id,entrenadorId:ME.entrenadorId,fecha:e.fecha,ts:o.ts||Date.now(),editado:o.ts?Date.now():null,comentarioEnt:o.comentarioEnt||''});
+  o.valores=o.valores.map((v,j)=>e.ej[j].u==='-'?{hecho:!!v.hecho,nota:(v.nota||'').trim()}:{v:num(v.v),nota:(v.nota||'').trim()});
+  if(!await guardar(()=>db.put('resultados',o)))return;
+  const nuevos=[];e.ej.forEach((x,j)=>{const v=o.valores[j].v;if(v==null)return;const s=antes.find(s=>s.k===norm(x.n)+'|'+x.u);if(s&&s.pts.length){const b=best(s);if(x.mejor==='menos'?v<b:v>b)nuevos.push(`${x.n}: ${v} ${x.u}`)}});
+  REG=null;hist=hist.filter(h=>h.v!=='registrar');V={v:'entreno',p:{id:e.id}};render();
+  sheet(`<div style="text-align:center"><div style="width:64px;height:64px;border-radius:50%;background:rgba(60,207,142,.15);color:var(--ok);display:grid;place-items:center;margin:4px auto 12px">${ic('check',32)}</div><h2>Registro guardado</h2><p class="mut">Tu entrenador ya puede verlo.</p>
+   ${nuevos.length?`<div class="note acc" style="text-align:left;margin:12px 0"><b>Nuevo récord personal</b>${nuevos.map(esc).join('<br>')}</div>`:''}<button class="btn pri full" onclick="cerrar()">Hecho</button></div>`)}
+
+function aProgreso(){const ss=series(ME.id);const rs=D.resultados;const ad=adherenciaA();const rpe=avg(rs.slice(-8).map(r=>r.rpe).filter(Boolean));
+  const hoy=HOY();let wk=lunes(hoy);const sem=[];for(let i=0;i<8;i++){const f=addDays(wk,6);sem.unshift({l:wk,n:rs.filter(r=>r.fecha>=wk&&r.fecha<=f).length});wk=addDays(wk,-7)}const mx=Math.max(3,...sem.map(s=>s.n));
+  return PH('Mi progreso')+`<div class="kpis"><div class="kpi"><div class="v">${rs.length}</div><div class="l">Entrenos completados</div></div><div class="kpi"><div class="v">${ad?ad.p:'–'}<small>${ad?'%':''}</small></div><div class="l">Cumplimiento</div></div><div class="kpi"><div class="v">${rpe?r1(rpe):'–'}</div><div class="l">RPE medio reciente</div></div></div>
+  ${chartCard(ss,'me')}
+  <div class="card"><h3>Entrenos por semana</h3><div style="display:flex;align-items:flex-end;gap:6px;height:110px">${sem.map((s,i)=>`<div style="flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:4px"><small style="font-weight:700">${s.n||''}</small><div style="width:100%;height:${Math.max(3,s.n/mx*80)}%;border-radius:6px 6px 3px 3px;background:${i===7?'var(--acc)':'var(--s3)'}"></div><small class="mut" style="font-size:.66rem">${i===7?'Esta':fD(s.l,{day:'numeric',month:'numeric'})}</small></div>`).join('')}</div></div>
+  ${ss.length?`<div class="card"><h3>Mejores marcas</h3><table><thead><tr><th>Ejercicio</th><th>Mejor</th><th>Registros</th></tr></thead><tbody>${ss.map(s=>`<tr><td>${esc(s.n)}</td><td class="cond" style="font-size:1.1rem;color:var(--acc)">${best(s)} ${uTxt(s.u)}</td><td class="mut">${s.pts.length}</td></tr>`).join('')}</tbody></table></div>`:''}`}
+
+function aRetos(){const hoy=HOY();const act=D.retos.filter(r=>!r.fin||r.fin>=hoy),pas=D.retos.filter(r=>r.fin&&r.fin<hoy);
+  const card=r=>{const b=bestInt(r,ME.id),ok=logrado(r,b);const ints=D.intentos.filter(i=>i.retoId===r.id).sort((a,b)=>b.fecha.localeCompare(a.fecha));const pct=b!=null&&r.objetivo?Math.min(100,Math.round((r.mejor==='menos'?r.objetivo/b:b/r.objetivo)*100)):0;
+   return`<div class="card"><div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div><h3 style="margin:0 0 4px">${esc(r.titulo)}</h3><div class="mut sm">${r.fin?'Hasta el '+fD(r.fin,{day:'numeric',month:'long'}):''}</div></div>${ok?'<span class="tag ok">Logrado</span>':''}</div>
+    ${r.desc?`<p class="sm" style="margin:10px 0">${esc(r.desc)}</p>`:''}
+    <div class="grid2" style="margin:10px 0"><div><div class="mut sm">Objetivo</div><div class="cond" style="font-size:1.5rem">${r.objetivo??'–'} ${uTxt(r.u)}</div></div><div><div class="mut sm">Tu mejor</div><div class="cond" style="font-size:1.5rem;color:var(--acc)">${b??'–'} ${b!=null?uTxt(r.u):''}</div></div></div>
+    <div class="bar ${ok?'ok':''}"><i style="width:${ok?100:pct}%"></i></div>
+    ${!r.fin||r.fin>=hoy?`<div class="inrow" style="margin-top:12px"><input id="it_${r.id}" type="number" step="any" inputmode="decimal" placeholder="Nuevo intento"><span class="unit">${r.u}</span><button class="btn pri" onclick="intento('${r.id}')">Apuntar</button></div>`:''}
+    ${ints.length?`<div class="mut sm" style="margin-top:10px">Intentos: ${ints.slice(0,6).map(i=>`${i.valor} (${fD(i.fecha)})`).join(' · ')}</div>`:''}</div>`};
+  return PH('Mis retos','Objetivos que te propone tu entrenador')+(act.length?act.map(card).join(''):'<div class="card"><div class="empty">No tienes retos activos ahora mismo.</div></div>')+(pas.length?`<h3 style="margin:18px 2px 10px" class="mut">Finalizados</h3>${pas.map(card).join('')}`:'')}
+async function intento(rid){const r=D.retos.find(x=>x.id===rid);const v=num($('#it_'+rid).value);if(v==null||v<=0){toast('Escribe un valor válido');return}
+  const antes=bestInt(r,ME.id);
+  await guardar(()=>db.put('intentos',{retoId:rid,atletaId:ME.id,entrenadorId:ME.entrenadorId,fecha:HOY(),valor:v}),null);
+  const ok=logrado(r,v)&&!logrado(r,antes);const mejora=antes!=null&&(r.mejor==='menos'?v<antes:v>antes);
+  toast(ok?'¡Reto conseguido!':mejora?'Nueva mejor marca':'Intento guardado')}
+
+/* ============================ gráficas ============================ */
+function dibujar(el){const W=360,H=170,L=34,R=14,T=22,B=26;let pts,inv=false,u='';
+  if(el.dataset.chart==='ex'){const s=JSON.parse(el.dataset.s);pts=s.pts;inv=s.mejor==='menos';u=s.u}
+  else{pts=D.resultados.filter(r=>r.atletaId===el.dataset.a&&r.rpe).sort((a,b)=>a.fecha.localeCompare(b.fecha)).slice(-12).map(r=>({f:r.fecha,v:r.rpe}))}
+  if(pts.length<2){el.innerHTML=`<div class="mut sm" style="padding:10px 0">${pts.length?'Una sola marca registrada ('+pts[0].v+' '+uTxt(u)+'). Con el siguiente registro verás la tendencia.':'Sin datos'}</div>`;return}
+  const vs=pts.map(p=>p.v);let lo=Math.min(...vs),hi=Math.max(...vs);if(el.dataset.chart==='rpe'){lo=0;hi=10}else{const pd=(hi-lo||1)*.2;lo-=pd;hi+=pd}
+  const x=i=>L+i*(W-L-R)/(pts.length-1);const fr=v=>(v-lo)/(hi-lo);const y=v=>inv?T+fr(v)*(H-T-B):H-B-fr(v)*(H-T-B);
+  const ticks=[lo+(hi-lo)*.15,(lo+hi)/2,hi-(hi-lo)*.15];const fmt=v=>Math.abs(v)<20?r1(v):Math.round(v);
+  const path=pts.map((p,i)=>`${i?'L':'M'}${x(i)},${y(p.v)}`).join(' ');
+  const area=path+` L${x(pts.length-1)},${H-B} L${x(0)},${H-B} Z`;
+  const step=Math.ceil(pts.length/6);
+  el.innerHTML=`<svg class="chart" viewBox="0 0 ${W} ${H}"><defs><linearGradient id="ga" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff6a2b" stop-opacity=".28"/><stop offset="1" stop-color="#ff6a2b" stop-opacity="0"/></linearGradient></defs>
+   ${ticks.map(t=>`<line x1="${L}" x2="${W-R}" y1="${y(t)}" y2="${y(t)}" stroke="#2a3441" stroke-dasharray="3 4"/><text x="${L-6}" y="${y(t)+4}" fill="#5d6878" font-size="10" text-anchor="end" font-family="Barlow">${fmt(t)}</text>`).join('')}
+   <path d="${area}" fill="url(#ga)"/><path d="${path}" fill="none" stroke="#ff6a2b" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+   ${pts.map((p,i)=>`<circle cx="${x(i)}" cy="${y(p.v)}" r="4" fill="#0d1117" stroke="#ff6a2b" stroke-width="2"/>${i===pts.length-1?`<text x="${x(i)}" y="${y(p.v)-10}" fill="#e6ebf1" font-size="12" font-weight="700" text-anchor="end" font-family="Barlow">${p.v}</text>`:''}${i%step===0||i===pts.length-1?`<text x="${x(i)}" y="${H-6}" fill="#5d6878" font-size="10" text-anchor="middle" font-family="Barlow">${fD(p.f,{day:'numeric',month:'numeric'})}</text>`:''}`).join('')}</svg>`}
+
+/* ============================ arranque ============================ */
+(async()=>{try{await db.init();ME=await db.session();if(ME)await recargar()}catch(e){$('#app').innerHTML=`<div class="loading"><div style="text-align:center;padding:20px"><h2>No se pudo iniciar</h2><p class="mut">${esc(e.message)}</p></div></div>`;return}render()})();
+</script>
+</body>
+</html>
